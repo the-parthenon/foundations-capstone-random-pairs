@@ -12,7 +12,68 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
   },
 });
 
+// This function will shuffle the elements of an array, using the Fisher-Yates Shuffle
+const shuffle = (arr) => {
+  let back = arr.length;
+  let elem = 0;
+  let temp = 0;
+
+  while (back) {
+    elem = Math.floor(Math.random() * back--);
+    temp = arr[back];
+    arr[back] = arr[elem];
+    arr[elem] = temp;
+  }
+  return arr;
+};
+
+// const getStudentArray = () => {
+//   const studentArr = [];
+//   sequelize
+//     .query(
+//       `
+//             SELECT student_id FROM students;
+//         `
+//     )
+//     .then((res) => {
+//       console.log(res[0]); //[0]['student_id']);
+//       res[0].forEach((elem) => {
+//         // console.log(elem);
+//         let student_id = elem['student_id'];
+//         studentArr.push(student_id);
+//       });
+//       // console.log(studentArr);
+//     });
+//   return studentArr;
+// };
+
 module.exports = {
+  getPairings: (req, res) => {
+    const studentArr = [];
+    sequelize
+      .query(
+        `
+            SELECT student_id FROM students;
+        `
+      )
+      .then((res) => {
+        // console.log(res[0]); //[0]['student_id']);
+        res[0].forEach((elem) => {
+          // console.log(elem);
+          let student_id = elem['student_id'];
+          studentArr.push(student_id);
+        });
+        console.log(studentArr);
+        let shuffledArr = shuffle(studentArr);
+        console.log(shuffledArr);
+      });
+
+    // };
+
+    //   // .then((dbRes) => res.status(200).send(dbRes[0]))
+    //   // .catch((err) => console.log(err));
+  },
+
   seed: (req, res) => {
     sequelize
       .query(
