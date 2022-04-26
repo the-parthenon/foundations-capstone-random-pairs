@@ -50,27 +50,30 @@ const shuffle = (arr) => {
 module.exports = {
   getPairings: (req, res) => {
     const studentArr = [];
+    const pairedArr = [];
     sequelize
       .query(
         `
-            SELECT student_id FROM students;
+            SELECT * FROM students;
         `
       )
       .then((res) => {
         // console.log(res[0]); //[0]['student_id']);
         res[0].forEach((elem) => {
           // console.log(elem);
-          let student_id = elem['student_id'];
-          studentArr.push(student_id);
+          let studentId = elem['first_name'] + ' ' + elem['last_name'];
+          studentArr.push(studentId);
         });
-        console.log(studentArr);
-        let shuffledArr = shuffle(studentArr);
-        console.log(shuffledArr);
+        // console.log(studentArr);
+        shuffle(studentArr);
+
+        for (let i = 0; i < studentArr.length; i += 2) {
+          pairedArr.push('1. ' + studentArr[i] + ' 2. ' + studentArr[i + 1]);
+        }
+      })
+      .then(() => {
+        res.status(200).send(pairedArr);
       });
-
-    // };
-
-    //   // .then((dbRes) => res.status(200).send(dbRes[0]))
     //   // .catch((err) => console.log(err));
   },
 
