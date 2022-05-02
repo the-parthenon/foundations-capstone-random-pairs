@@ -1,9 +1,10 @@
 const getPairButton = document.getElementById('rando-button');
 const pairList = document.getElementById('pair-list');
+const studentList = document.getElementById('student-list');
 // const studentArr = [];
 function getPairings() {
   console.log(`Going to get pairings!`);
-  axios.get('http://localhost:6060/pairings').then((res) => {
+  axios.get(`http://localhost:6060/pairings`).then((res) => {
     console.log(res.data);
     res.data.forEach((elem) => {
       let pairing = `<h1>${elem}</h1>`;
@@ -11,14 +12,19 @@ function getPairings() {
       pairList.innerHTML += pairing;
     });
   });
-  //   res.data.forEach((elem) => {
-  //     //   console.log(elem);
-  //     let student_id = elem['student_id'];
-  //     studentArr.push(student_id);
-  //   });
-  //   console.log(studentArr);
-  // });
-  //   .catch((err) => console.log(err));
 }
 
-getPairings();
+const getStudents = () => {
+  console.log(`Going to get the students!`);
+  axios.get(`http://localhost:6060/studentlist`).then((res) => {
+    console.log(res.data);
+    res.data.forEach((elem) => {
+      let student = `<h1>${elem.firstName} ${elem.lastName}</h1>`;
+
+      studentList.innerHTML += student;
+    });
+  });
+};
+
+getStudents();
+getPairButton.addEventListener('click', getPairings);
