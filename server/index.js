@@ -11,8 +11,9 @@ app.use(cors());
 // DEV
 app.post('/seed', seed);
 
-// Generate Pairings
+// Get Student List
 app.get('/studentlist', getList);
-// app.get('/pairings', getPairings);
+// Generate Pairings
+app.get('/pairings', getPairings);
 
 app.listen(SERVER_PORT, () => console.log(`up on ${SERVER_PORT}`));

@@ -26,5 +26,5 @@ const getStudents = () => {
   });
 };
 
-getStudents();
+// getStudents();
 getPairButton.addEventListener('click', getPairings);
