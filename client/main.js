@@ -1,6 +1,7 @@
 const getPairButton = document.getElementById('rando-button');
 const pairList = document.getElementById('pair-list');
 const studentList = document.getElementById('student-list');
+const pairOneButton = document.getElementById('single-test');
 
 const getPairings = () => {
   console.log(`Going to get pairings!`);
@@ -29,5 +30,11 @@ const getStudents = () => {
   });
 };
 
+const pairOne = () => {
+  console.log(`Single pair, heard!`);
+  axios.get(`http://localhost:6060/pairone`);
+};
+
 // getStudents();
 getPairButton.addEventListener('click', getPairings);
+pairOneButton.addEventListener('click', pairOne);

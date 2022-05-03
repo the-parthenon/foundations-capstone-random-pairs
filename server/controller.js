@@ -12,67 +12,52 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
   },
 });
 
-const { shuffle } = require('./functions.js');
+module.exports = sequelize;
 
-//Define Student model in sequelize
-const Student = sequelize.define('Student', {
-  firstName: {
-    type: DataTypes.STRING,
-  },
-  lastName: {
-    type: DataTypes.STRING,
-  },
-});
+const { shuffle, getEverybody } = require('./functions.js');
+const { Student, Pair } = require('./models');
 
-//Define Pair model in sequelize
-const Pair = sequelize.define('pair_history', {
-  studentOne: {
-    type: DataTypes.INTEGER,
+// const getEverybody = new Promise((resolve, reject) => {
+//   let fullList = Student.findAll({
+//     attributes: ['id', 'firstName', 'lastName'],
+//   });
+//   resolve(fullList);
+// });
 
-    references: {
-      model: Student,
-      key: 'id',
+const getPairList = new Promise((resolve, reject) => {
+  let pairList = Pair.findAll({
+    attributes: ['studentTwo'],
+    where: {
+      studentOne: 1,
     },
-  },
-  studentTwo: {
-    type: DataTypes.INTEGER,
-
-    references: {
-      model: Student,
-      key: 'id',
-    },
-  },
+  });
+  resolve(pairList);
 });
 
 module.exports = {
   //Gets a full list of the entries in the Students table
   getList: (req, res) => {
-    let fullList = [];
-    (async () => {
-      fullList = await Student.findAll({
-        attributes: ['id', 'firstName', 'lastName'],
-      });
-      // console.log('All students: ', JSON.stringify(fullList, null, 2));
-    })().then(() => {
-      res.status(200).send(fullList);
+    getEverybody().then((list) => {
+      res.status(200).send(list);
     });
   },
 
   onePair: (req, res) => {
     console.log('Endpoint set up');
+    getEverybody().then(console.log('Everybody, everybody'));
+    getPairList.then((pairs) => {
+      // console.log(`Pair list: `, JSON.stringify(pairs, null, 2));
+      console.log(pairs.includes(2));
+    });
+    // console.log('All students: ', JSON.stringify(fullList, null, 2));
   },
 
   //Randomly assigns pairings between entries in the Students table
   getPairings: (req, res) => {
-    let studentArr = [];
     let pairedArr = [];
     let priorPairs = [];
 
-    (async () => {
-      studentArr = await Student.findAll({
-        attributes: ['id', 'firstName', 'lastName'],
-      });
-    })().then(() => {
+    getEverybody().then((studentArr) => {
       shuffle(studentArr);
       // console.log(JSON.stringify(studentArr, null, 2));
       for (let i = 0; i < studentArr.length; i += 2) {
@@ -136,6 +121,20 @@ module.exports = {
         { firstName: 'Julie', lastName: 'July' },
         { firstName: 'Kelly', lastName: 'Kapowski' },
         { firstName: 'Leslie', lastName: 'Lamour' },
+      ]);
+      await Pair.bulkCreate([
+        { studentOne: 1, studentTwo: 2 },
+        { studentOne: 1, studentTwo: 3 },
+        { studentOne: 1, studentTwo: 4 },
+        { studentOne: 1, studentTwo: 5 },
+        { studentOne: 1, studentTwo: 6 },
+        { studentOne: 1, studentTwo: 7 },
+        { studentOne: 1, studentTwo: 8 },
+        { studentOne: 1, studentTwo: 9 },
+        { studentOne: 1, studentTwo: 10 },
+        { studentOne: 2, studentTwo: 3 },
+        { studentOne: 2, studentTwo: 4 },
+        { studentOne: 2, studentTwo: 5 },
       ]);
     })().then(() => {
       console.log('DB seeded!');
