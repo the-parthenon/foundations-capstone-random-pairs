@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const { SERVER_PORT } = process.env;
-const { seed, getPairings, getList } = require('./controller.js');
+const { seed, getPairings, getList, onePair } = require('./controller.js');
 
 app.use(express.json());
 app.use(cors());
@@ -15,5 +15,6 @@ app.post('/seed', seed);
 app.get('/studentlist', getList);
 // Generate Pairings
 app.get('/pairings', getPairings);
+app.get('/pairone', onePair);
 
 app.listen(SERVER_PORT, () => console.log(`up on ${SERVER_PORT}`));

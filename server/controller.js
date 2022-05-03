@@ -14,6 +14,7 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
 
 const { shuffle } = require('./functions.js');
 
+//Define Student model in sequelize
 const Student = sequelize.define('Student', {
   firstName: {
     type: DataTypes.STRING,
@@ -23,6 +24,7 @@ const Student = sequelize.define('Student', {
   },
 });
 
+//Define Pair model in sequelize
 const Pair = sequelize.define('pair_history', {
   studentOne: {
     type: DataTypes.INTEGER,
@@ -43,6 +45,7 @@ const Pair = sequelize.define('pair_history', {
 });
 
 module.exports = {
+  //Gets a full list of the entries in the Students table
   getList: (req, res) => {
     let fullList = [];
     (async () => {
@@ -55,10 +58,14 @@ module.exports = {
     });
   },
 
+  onePair: (req, res) => {
+    console.log('Endpoint set up');
+  },
+
+  //Randomly assigns pairings between entries in the Students table
   getPairings: (req, res) => {
     let studentArr = [];
     let pairedArr = [];
-    let rawArr = [];
     let priorPairs = [];
 
     (async () => {
@@ -75,7 +82,7 @@ module.exports = {
           } ${studentArr[i + 1].lastName}`
         );
       }
-      console.log(JSON.stringify(pairedArr, null, 2));
+      // console.log(JSON.stringify(pairedArr, null, 2));
       res.status(200).send(pairedArr);
     });
 
@@ -116,7 +123,7 @@ module.exports = {
   seed: (req, res) => {
     (async () => {
       await sequelize.sync({ force: true });
-      const startingStudents = await Student.bulkCreate([
+      await Student.bulkCreate([
         { firstName: 'Amy', lastName: 'Adams' },
         { firstName: 'Billy', lastName: 'Body' },
         { firstName: 'Chester', lastName: 'Cheetah' },
