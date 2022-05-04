@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const { SERVER_PORT } = process.env;
-const { seed, getPairings, getList, onePair } = require('./controller.js');
+const { getPairings, getList, onePair, seed } = require('./controller.js');
 
 app.use(express.json());
 app.use(cors());

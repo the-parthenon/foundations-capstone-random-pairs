@@ -8,35 +8,36 @@ const { Student, Group, Assignment } = require('./models'); //Assignment
 
 module.exports = {
   // This function will shuffle the elements of an array, using the Fisher-Yates Shuffle Algorithm
-  shuffle: (arr) => {
-    let back = arr.length;
-    let elem = 0;
-    let temp = 0;
+  // shuffle: (arr) => {
+  //   let back = arr.length;
+  //   let elem = 0;
+  //   let temp = 0;
 
-    while (back) {
-      elem = Math.floor(Math.random() * back--);
-      temp = arr[back];
-      arr[back] = arr[elem];
-      arr[elem] = temp;
-    }
-    return arr;
-  },
+  //   while (back) {
+  //     elem = Math.floor(Math.random() * back--);
+  //     temp = arr[back];
+  //     arr[back] = arr[elem];
+  //     arr[elem] = temp;
+  //   }
+  //   return arr;
+  // },
 
   getEverybody: () => {
     const everybody = new Promise((resolve, reject) => {
       let fullList = Student.findAll({
         attributes: ['id', 'firstName', 'lastName'],
+        order: sequelize.random(),
       });
       resolve(fullList);
     });
     return everybody;
   },
 
-  getPastGroups: () => {
+  getPastGroups: (idnum) => {
     let pairQuery = new Promise((resolve, reject) => {
       let pairedList = Assignment.findAll({
         attributes: ['groupId'],
-        where: { studentId: 1 },
+        where: { studentId: idnum },
       });
       resolve(pairedList);
     });
@@ -53,6 +54,7 @@ module.exports = {
             [Op.or]: arr,
           },
         },
+        group: 'studentId',
       });
       resolve(pastList);
     });

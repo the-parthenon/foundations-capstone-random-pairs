@@ -65,4 +65,4 @@ Group.belongsTo(Assignment);
 //   },
 // });
 
-module.exports = { Student, Group, Assignment }; //Assignment
+module.exports = { Student, Group, Assignment };

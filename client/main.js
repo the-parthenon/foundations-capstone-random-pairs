@@ -32,7 +32,9 @@ const getStudents = () => {
 
 const pairOne = () => {
   console.log(`Single pair, heard!`);
-  axios.get(`http://localhost:6060/pairone`);
+  axios.get(`http://localhost:6060/pairone`).then((res) => {
+    console.log(res.data);
+  });
 };
 
 // getStudents();
