@@ -1,7 +1,10 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
+const { Sequelize, DataTypes, Model, Op } = require('sequelize');
 
 const sequelize = require('./controller');
-const { Student } = require('./models');
+const { Student, Group, Assignment } = require('./models'); //Assignment
+
+// Student.belongsToMany(Group, { through: Assignment });
+// Group.belongsToMany(Student, { through: Assignment });
 
 module.exports = {
   // This function will shuffle the elements of an array, using the Fisher-Yates Shuffle Algorithm
@@ -27,5 +30,32 @@ module.exports = {
       resolve(fullList);
     });
     return everybody;
+  },
+
+  getPastGroups: () => {
+    let pairQuery = new Promise((resolve, reject) => {
+      let pairedList = Assignment.findAll({
+        attributes: ['groupId'],
+        where: { studentId: 1 },
+      });
+      resolve(pairedList);
+    });
+    return pairQuery;
+  },
+
+  getPastPairs: (arr) => {
+    // console.log(arr);
+    let pairQuery = new Promise((resolve, reject) => {
+      let pastList = Assignment.findAll({
+        attributes: ['studentId'],
+        where: {
+          groupId: {
+            [Op.or]: arr,
+          },
+        },
+      });
+      resolve(pastList);
+    });
+    return pairQuery;
   },
 };
