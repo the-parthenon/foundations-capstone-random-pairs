@@ -85,10 +85,29 @@ module.exports = {
       .then((list) => {
         return (everybody = list);
       })
+      .then(async function test() {
+        console.log(`Everybody:`, JSON.stringify(everybody, null, 2));
+        let groups = await getPastGroups(everybody[everybody.length - 1].id);
+        groupArr = groups.map((a) => a.groupId);
+        let pairs = await getPastPairs(groupArr);
+        pairs.forEach((ele) => {
+          pairArr.push(ele.studentId);
+        });
+        for (let i = 0; i < everybody.length; i++) {
+          if (pairArr.includes(everybody[everybody.length - 2].id)) {
+            let temp = everybody[everybody.length - 2];
+            everybody[everybody.length - 2] = everybody[i];
+            everybody[i] = temp;
+            console.log(`Broke infinite loop!?!!?`);
+          } else {
+            break;
+          }
+        }
+      })
       .then(() => {
         (async function loop() {
           do {
-            console.log(`Everybody else:`, JSON.stringify(everybody, null, 2));
+            // console.log(`Everybody else:`, JSON.stringify(everybody, null, 2));
             //get the past groups for the current student
             let groups = await getPastGroups(everybody[0].id);
             groupArr = groups.map((a) => a.groupId);
