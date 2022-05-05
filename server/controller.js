@@ -51,7 +51,8 @@ module.exports = {
         return (everybody = list);
       })
       .then(async () => {
-        console.log(everybody.length);
+        // console.log(everybody.length);
+        // console.log(`Everybody :`, JSON.stringify(everybody, null, 2));
         if (everybody.length % 2 !== 0) {
           console.log('Uh-oh, odd number of students!');
           // oddOneOut = everybody.splice(everybody.length - 1, 1);
@@ -101,6 +102,7 @@ module.exports = {
       })
       .then(async function test() {
         //This attempts to fix most common infinite loop problem in pairing.
+        console.log(`Everybody:`, JSON.stringify(everybody, null, 2));
         let groups = await getPastGroups(everybody[everybody.length - 1].id);
         groupArr = groups.map((a) => a.groupId);
         let pairs = await getPastPairs(groupArr);
@@ -112,6 +114,7 @@ module.exports = {
             let temp = everybody[everybody.length - 2];
             everybody[everybody.length - 2] = everybody[i];
             everybody[i] = temp;
+            console.log(`Everybody after swap:`, JSON.stringify(everybody, null, 2));
             console.log(`Broke infinite loop!?!!?`);
           } else {
             break;
@@ -121,7 +124,7 @@ module.exports = {
       .then(() => {
         (async function loop() {
           do {
-            // console.log(`Everybody else:`, JSON.stringify(everybody, null, 2));
+            console.log(`Everybody else:`, JSON.stringify(everybody, null, 2));
             //get the past groups for the current student
             let groups = await getPastGroups(everybody[0].id);
             groupArr = groups.map((a) => a.groupId);
