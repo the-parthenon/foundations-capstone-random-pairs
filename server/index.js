@@ -3,13 +3,14 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const { SERVER_PORT } = process.env;
-const { getPairings, getList, onePair, seed } = require('./controller.js');
+const { getPairings, getList, onePair, seed, test } = require('./controller.js');
 
 app.use(express.json());
 app.use(cors());
 
 // DEV
 app.post('/seed', seed);
+app.get('/test', test);
 
 // Get Student List
 app.get('/studentlist', getList);

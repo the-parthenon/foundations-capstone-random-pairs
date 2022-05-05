@@ -75,6 +75,55 @@ module.exports = {
       });
   },
 
+  test: (req, res) => {
+    let everybody = [];
+    let groupArr = [];
+    let pairArr = [];
+    let pairedArr = [];
+
+    getEverybody()
+      .then((list) => {
+        return (everybody = list);
+      })
+      .then(() => {
+        (async function loop() {
+          do {
+            let groups = await getPastGroups(everybody[0].id);
+            // console.log(JSON.stringify(groups, null, 2));
+            groups.forEach((element) => {
+              groupArr.push(element.groupId);
+            });
+            // console.log(groupArr);
+            let pairs = await getPastPairs(groupArr);
+            // console.log(JSON.stringify(pairs, null, 2));
+            pairs.forEach((element) => {
+              pairArr.push(element.studentId);
+            });
+            for (let i = 1; i < everybody.length; i++) {
+              if (!pairArr.includes(everybody[i].id)) {
+                pairedArr.push(
+                  `1. ${everybody[0].firstName} ${everybody[0].lastName} 2. ${everybody[i].firstName} ${everybody[i].lastName}`
+                );
+                everybody.splice(i, 1);
+                everybody.splice(0, 1);
+                groupArr = [];
+                pairArr = [];
+                break;
+              }
+            }
+            console.log(pairedArr);
+          } while (everybody.length > 0);
+        })()
+          .then(() => {
+            // console.log(JSON.stringify(groups[0], null, 2));
+          })
+          .then(() => {
+            res.status(200).send(pairedArr);
+          });
+        // console.log('Endpoint set up');
+      });
+  },
+
   //Randomly assigns pairings between entries in the Students table (no history considered)
   getPairings: (req, res) => {
     let pairedArr = [];
