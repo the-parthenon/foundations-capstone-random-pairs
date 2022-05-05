@@ -69,24 +69,5 @@ Assignment.hasMany(Student);
 Student.belongsTo(Assignment);
 Assignment.hasMany(Group);
 Group.belongsTo(Assignment);
-//Define Pair model in sequelize
-// const Pair = sequelize.define('pair', {
-//   studentOne: {
-//     type: DataTypes.INTEGER,
-
-//     references: {
-//       model: Student,
-//       key: 'id',
-//     },
-//   },
-//   studentTwo: {
-//     type: DataTypes.INTEGER,
-
-//     references: {
-//       model: Student,
-//       key: 'id',
-//     },
-//   },
-// });
 
 module.exports = { Student, Group, Assignment };

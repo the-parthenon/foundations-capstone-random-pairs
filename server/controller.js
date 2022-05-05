@@ -25,7 +25,7 @@ module.exports = {
     });
   },
 
-  test: (req, res) => {
+  addStudent: (req, res) => {
     console.log('Endpoint set up!');
     const { newName } = req.body;
     console.log(newName);
@@ -43,13 +43,64 @@ module.exports = {
     let groupArr = [];
     let pairArr = [];
     let pairedArr = [];
+    let groupsCount = 1;
+    let oddOneOut;
 
     getEverybody()
       .then((list) => {
         return (everybody = list);
       })
+      .then(async () => {
+        console.log(everybody.length);
+        if (everybody.length % 2 !== 0) {
+          console.log('Uh-oh, odd number of students!');
+          // oddOneOut = everybody.splice(everybody.length - 1, 1);
+          // console.log(everybody.length);
+          let groups = await getPastGroups(everybody[0].id);
+          groupArr = groups.map((a) => a.groupId);
+          let pairs = await getPastPairs(groupArr);
+          pairs.forEach((element) => {
+            pairArr.push(element.studentId);
+          });
+
+          for (let i = 1; i < everybody.length; i++) {
+            if (!pairArr.includes(everybody[i].id)) {
+              let groups = await getPastGroups(everybody[i].id);
+              groupArr = groups.map((a) => a.groupId);
+              let pairs = await getPastPairs(groupArr);
+              pairs.forEach((element) => {
+                pairArr.push(element.studentID);
+              });
+              for (let j = i + 1; j < everybody.length; j++) {
+                let newGroup = await Group.create({
+                  group_name: `Group ${groupsCount}`,
+                });
+                groupsCount++;
+                await Assignment.bulkCreate([
+                  { groupId: newGroup.id, studentId: everybody[0].id },
+                  { groupId: newGroup.id, studentId: everybody[i].id },
+                  { groupId: newGroup.id, studentId: everybody[j].id },
+                ]);
+                pairedArr.push([
+                  newGroup.group_name,
+                  everybody[0].getFullName(),
+                  everybody[i].getFullName(),
+                  everybody[j].getFullName(),
+                ]);
+                everybody.splice(j, 1);
+                everybody.splice(i, 1);
+                everybody.splice(0, 1);
+                groupArr = [];
+                pairArr = [];
+                break;
+              }
+            }
+            break;
+          }
+        }
+      })
       .then(async function test() {
-        // console.log(`Everybody:`, JSON.stringify(everybody, null, 2));
+        //This attempts to fix most common infinite loop problem in pairing.
         let groups = await getPastGroups(everybody[everybody.length - 1].id);
         groupArr = groups.map((a) => a.groupId);
         let pairs = await getPastPairs(groupArr);
@@ -80,10 +131,20 @@ module.exports = {
             pairs.forEach((element) => {
               pairArr.push(element.studentId);
             });
+
             for (let i = 1; i < everybody.length; i++) {
               if (!pairArr.includes(everybody[i].id)) {
-                let newPair = [everybody[0].getFullName(), everybody[i].getFullName()];
-                pairedArr.push(newPair);
+                let newGroup = await Group.create({ group_name: `Group ${groupsCount}` });
+                groupsCount++;
+                await Assignment.bulkCreate([
+                  { groupId: newGroup.id, studentId: everybody[0].id },
+                  { groupId: newGroup.id, studentId: everybody[i].id },
+                ]);
+                pairedArr.push([
+                  newGroup.group_name,
+                  everybody[0].getFullName(),
+                  everybody[i].getFullName(),
+                ]);
                 everybody.splice(i, 1);
                 everybody.splice(0, 1);
                 groupArr = [];
@@ -103,25 +164,6 @@ module.exports = {
       });
   },
 
-  //Randomly assigns pairings between entries in the Students table (no history considered)
-  // getPairings: (req, res) => {
-  //   let pairedArr = [];
-  //   // let priorPairs = [];
-
-  //   getEverybody().then((studentArr) => {
-  //     // console.log(JSON.stringify(studentArr, null, 2));
-  //     for (let i = 0; i < studentArr.length; i += 2) {
-  //       pairedArr.push(
-  //         `1. ${studentArr[i].firstName} ${studentArr[i].lastName} 2. ${
-  //           studentArr[i + 1].firstName
-  //         } ${studentArr[i + 1].lastName}`
-  //       );
-  //     }
-  //     // console.log(JSON.stringify(pairedArr, null, 2));
-  //     res.status(200).send(pairedArr);
-  //   });
-  // },
-
   seed: (req, res) => {
     (async () => {
       await sequelize.sync({ force: true });
@@ -132,54 +174,54 @@ module.exports = {
         { firstName: 'Davey', lastName: 'Dillups' },
         { firstName: 'Edmund', lastName: 'Everly' },
         { firstName: 'Frankie', lastName: 'Fivetimes' },
-        // { firstName: 'Gilbert', lastName: 'Grape' },
-        // { firstName: 'Harry', lastName: 'Hambone' },
-        // { firstName: 'India', lastName: 'Illmatic' },
-        // { firstName: 'Julie', lastName: 'July' },
-        // { firstName: 'Kelly', lastName: 'Kapowski' },
-        // { firstName: 'Leslie', lastName: 'Lamour' },
+        { firstName: 'Gilbert', lastName: 'Grape' },
+        { firstName: 'Harry', lastName: 'Hambone' },
+        { firstName: 'India', lastName: 'Illmatic' },
+        { firstName: 'Julie', lastName: 'July' },
+        { firstName: 'Kelly', lastName: 'Kapowski' },
+        { firstName: 'Leslie', lastName: 'Lamour' },
       ]);
 
-      await Group.bulkCreate([
-        { group_name: 'Group 1' },
-        { group_name: 'Group 2' },
-        { group_name: 'Group 3' },
-        { group_name: 'Group 4' },
-        { group_name: 'Group 5' },
-        { group_name: 'Group 6' },
-        { group_name: 'Group 1' },
-        { group_name: 'Group 2' },
-        { group_name: 'Group 3' },
-        { group_name: 'Group 4' },
-        { group_name: 'Group 5' },
-        { group_name: 'Group 6' },
-      ]);
-      await Assignment.bulkCreate([
-        { groupId: 1, studentId: 1 },
-        { groupId: 1, studentId: 2 },
-        { groupId: 2, studentId: 3 },
-        { groupId: 2, studentId: 4 },
-        { groupId: 3, studentId: 5 },
-        { groupId: 3, studentId: 6 },
-        // { groupId: 4, studentId: 7 },
-        // { groupId: 4, studentId: 8 },
-        // { groupId: 5, studentId: 9 },
-        // { groupId: 5, studentId: 10 },
-        // { groupId: 6, studentId: 11 },
-        // { groupId: 6, studentId: 12 },
-        // { groupId: 7, studentId: 2 },
-        // { groupId: 7, studentId: 3 },
-        // { groupId: 8, studentId: 4 },
-        // { groupId: 8, studentId: 5 },
-        // { groupId: 9, studentId: 6 },
-        // { groupId: 9, studentId: 7 },
-        // { groupId: 10, studentId: 8 },
-        // { groupId: 10, studentId: 9 },
-        // { groupId: 11, studentId: 10 },
-        // { groupId: 11, studentId: 11 },
-        // { groupId: 12, studentId: 12 },
-        // { groupId: 12, studentId: 1 },
-      ]);
+      // await Group.bulkCreate([
+      //   // { group_name: 'Group 1' },
+      //   // { group_name: 'Group 2' },
+      //   // { group_name: 'Group 3' },
+      //   // { group_name: 'Group 4' },
+      //   // { group_name: 'Group 5' },
+      //   // { group_name: 'Group 6' },
+      //   // { group_name: 'Group 1' },
+      //   // { group_name: 'Group 2' },
+      //   // { group_name: 'Group 3' },
+      //   // { group_name: 'Group 4' },
+      //   // { group_name: 'Group 5' },
+      //   // { group_name: 'Group 6' },
+      // ]);
+      // await Assignment.bulkCreate([
+      // { groupId: 1, studentId: 1 },
+      // { groupId: 1, studentId: 2 },
+      // { groupId: 2, studentId: 3 },
+      // { groupId: 2, studentId: 4 },
+      // { groupId: 3, studentId: 5 },
+      // { groupId: 3, studentId: 6 },
+      // { groupId: 4, studentId: 7 },
+      // { groupId: 4, studentId: 8 },
+      // { groupId: 5, studentId: 9 },
+      // { groupId: 5, studentId: 10 },
+      // { groupId: 6, studentId: 11 },
+      // { groupId: 6, studentId: 12 },
+      // { groupId: 7, studentId: 2 },
+      // { groupId: 7, studentId: 3 },
+      // { groupId: 8, studentId: 4 },
+      // { groupId: 8, studentId: 5 },
+      // { groupId: 9, studentId: 6 },
+      // { groupId: 9, studentId: 7 },
+      // { groupId: 10, studentId: 8 },
+      // { groupId: 10, studentId: 9 },
+      // { groupId: 11, studentId: 10 },
+      // { groupId: 11, studentId: 11 },
+      // { groupId: 12, studentId: 12 },
+      // { groupId: 12, studentId: 1 },
+      // ]);
     })().then(() => {
       console.log('DB seeded!');
       res.sendStatus(200);

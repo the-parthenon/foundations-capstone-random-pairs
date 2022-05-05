@@ -9,13 +9,21 @@ const getPairings = () => {
   console.log(`Going to get pairings!`);
   axios.get(`http://localhost:6060/pairings`).then((res) => {
     console.log(res.data);
-    let groupNum = 1;
+    while (pairList.firstChild) {
+      pairList.removeChild(pairList.firstChild);
+    }
+
     res.data.forEach((elem) => {
       let pairDiv = document.createElement('div');
-      let divTitle = `<h3>Group ${groupNum}</h3>`;
       pairList.append(pairDiv);
-      pairDiv.innerHTML += `${divTitle}: <p>1. ${elem[0]} 2. ${elem[1]}</p>`;
-      groupNum++;
+      let divTitle = `<h5>${elem[0]}</h5>`;
+      pairDiv.innerHTML += `${divTitle}`;
+      for (let i = 1; i < elem.length; i++) {
+        let pText = `<p>${i}. ${elem[i]}</p>`;
+        // pText.innerHTML += `${pText}`;
+        pairDiv.innerHTML += `${pText}`;
+      }
+      // pairDiv.innerHTML += `${divTitle} <p>1. ${elem[1]} 2. ${elem[2]}</p>`;
     });
   });
 };
