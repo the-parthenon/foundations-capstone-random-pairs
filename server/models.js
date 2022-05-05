@@ -2,15 +2,39 @@ const { Sequelize, DataTypes, Model, Deferrable } = require('sequelize');
 
 const sequelize = require('./controller');
 
+class Student extends Model {
+  getFullName() {
+    return [this.firstName, this.lastName].join(' ');
+  }
+}
+
+Student.init(
+  {
+    firstName: {
+      type: DataTypes.STRING,
+    },
+    lastName: {
+      type: DataTypes.STRING,
+    },
+  },
+  {
+    sequelize,
+    modelName: 'student',
+  }
+);
 //Define Student model in sequelize
-const Student = sequelize.define('student', {
-  firstName: {
-    type: DataTypes.STRING,
-  },
-  lastName: {
-    type: DataTypes.STRING,
-  },
-});
+// const Student = sequelize.define('student', {
+//   firstName: {
+//     type: DataTypes.STRING,
+//   },
+//   lastName: {
+//     type: DataTypes.STRING,
+//   },
+
+//   getFullName() {
+//     return [this.firstName, this.lastName].join(' ');
+//   },
+// });
 
 const Group = sequelize.define('group', {
   group_name: {

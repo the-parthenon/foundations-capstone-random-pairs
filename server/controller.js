@@ -25,57 +25,20 @@ module.exports = {
     });
   },
 
-  onePair: (req, res) => {
-    let everybody = [];
-    let groupArr = [];
-    let pairArr = [];
-    let pairedArr = [];
-
-    getEverybody()
-      .then((list) => {
-        return (everybody = list);
-        // console.log(`Target pair: `, JSON.stringify(everybody[0], null, 2));
-      })
-      .then(() => {
-        //get all past groups for student at front of array
-        let groups = getPastGroups(everybody[0].id);
-        return groups;
-      })
-      .then((groups) => {
-        //populate groups array with all past groups for student at front of array
-        //then use the groups array to get all studentids that match those groups
-        // console.log(`Group list: `, JSON.stringify(groups, null, 2));
-        groups.forEach((element) => {
-          groupArr.push(element.groupId);
-        });
-        // console.log(groupArr);
-        return getPastPairs(groupArr);
-      })
-      .then((pairs) => {
-        console.log(`Pair list: `, JSON.stringify(pairs, null, 2));
-        pairs.forEach((element) => {
-          pairArr.push(element.studentId);
-        });
-        for (let i = 1; i < everybody.length; i++) {
-          if (!pairArr.includes(everybody[i].id)) {
-            pairedArr.push(
-              `1. ${everybody[0].firstName} ${everybody[0].lastName} 2. ${everybody[i].firstName} ${everybody[i].lastName}`
-            );
-            everybody.splice(i, 1);
-            everybody.splice(0, 1);
-            break;
-          }
-        }
-        return pairedArr;
-      })
-      .then(() => {
-        console.log(`Everybody Else: `, JSON.stringify(everybody, null, 2));
-        console.log(pairedArr);
-        res.status(200).send(pairedArr);
-      });
+  test: (req, res) => {
+    console.log('Endpoint set up!');
+    const { newName } = req.body;
+    console.log(newName);
+    (async () => {
+      let newStudentName = newName.split(' ');
+      await Student.create({ firstName: newStudentName[0], lastName: newStudentName[1] });
+    })().then(() => {
+      console.log('Added a student');
+      res.sendStatus(200);
+    });
   },
 
-  test: (req, res) => {
+  getPairings: (req, res) => {
     let everybody = [];
     let groupArr = [];
     let pairArr = [];
@@ -86,7 +49,7 @@ module.exports = {
         return (everybody = list);
       })
       .then(async function test() {
-        console.log(`Everybody:`, JSON.stringify(everybody, null, 2));
+        // console.log(`Everybody:`, JSON.stringify(everybody, null, 2));
         let groups = await getPastGroups(everybody[everybody.length - 1].id);
         groupArr = groups.map((a) => a.groupId);
         let pairs = await getPastPairs(groupArr);
@@ -119,7 +82,8 @@ module.exports = {
             });
             for (let i = 1; i < everybody.length; i++) {
               if (!pairArr.includes(everybody[i].id)) {
-                pairedArr.push(everybody[0], everybody[i]);
+                let newPair = [everybody[0].getFullName(), everybody[i].getFullName()];
+                pairedArr.push(newPair);
                 everybody.splice(i, 1);
                 everybody.splice(0, 1);
                 groupArr = [];
@@ -136,28 +100,27 @@ module.exports = {
           .then(() => {
             res.status(200).send(pairedArr);
           });
-        // console.log('Endpoint set up');
       });
   },
 
   //Randomly assigns pairings between entries in the Students table (no history considered)
-  getPairings: (req, res) => {
-    let pairedArr = [];
-    // let priorPairs = [];
+  // getPairings: (req, res) => {
+  //   let pairedArr = [];
+  //   // let priorPairs = [];
 
-    getEverybody().then((studentArr) => {
-      // console.log(JSON.stringify(studentArr, null, 2));
-      for (let i = 0; i < studentArr.length; i += 2) {
-        pairedArr.push(
-          `1. ${studentArr[i].firstName} ${studentArr[i].lastName} 2. ${
-            studentArr[i + 1].firstName
-          } ${studentArr[i + 1].lastName}`
-        );
-      }
-      // console.log(JSON.stringify(pairedArr, null, 2));
-      res.status(200).send(pairedArr);
-    });
-  },
+  //   getEverybody().then((studentArr) => {
+  //     // console.log(JSON.stringify(studentArr, null, 2));
+  //     for (let i = 0; i < studentArr.length; i += 2) {
+  //       pairedArr.push(
+  //         `1. ${studentArr[i].firstName} ${studentArr[i].lastName} 2. ${
+  //           studentArr[i + 1].firstName
+  //         } ${studentArr[i + 1].lastName}`
+  //       );
+  //     }
+  //     // console.log(JSON.stringify(pairedArr, null, 2));
+  //     res.status(200).send(pairedArr);
+  //   });
+  // },
 
   seed: (req, res) => {
     (async () => {

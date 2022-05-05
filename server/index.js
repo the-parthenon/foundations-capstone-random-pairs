@@ -10,12 +10,15 @@ app.use(cors());
 
 // DEV
 app.post('/seed', seed);
-app.get('/test', test);
+// app.get('/test', test);
+
+//Add Students to List
+app.post('/studentadd', test);
 
 // Get Student List
 app.get('/studentlist', getList);
 // Generate Pairings
 app.get('/pairings', getPairings);
-app.get('/pairone', onePair);
+// app.get('/pairone', onePair);
 
 app.listen(SERVER_PORT, () => console.log(`up on ${SERVER_PORT}`));
