@@ -22,24 +22,15 @@ Student.init(
     modelName: 'student',
   }
 );
-//Define Student model in sequelize
-// const Student = sequelize.define('student', {
-//   firstName: {
-//     type: DataTypes.STRING,
-//   },
-//   lastName: {
-//     type: DataTypes.STRING,
-//   },
-
-//   getFullName() {
-//     return [this.firstName, this.lastName].join(' ');
-//   },
-// });
 
 const Group = sequelize.define('group', {
   group_name: {
     type: DataTypes.STRING,
   },
+  // ishidden: {
+  //   type: DataTypes.BOOLEAN,
+  //   defaultValue: false,
+  // },
 });
 
 // Define Assignment model in sequelize
@@ -60,6 +51,11 @@ const Assignment = sequelize.define('assignment', {
       model: Group,
       key: 'id',
     },
+  },
+
+  ishidden: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
 });
 

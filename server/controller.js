@@ -49,6 +49,7 @@ module.exports = {
     let tripleCheck = false;
     let deadlyPattern = [];
     let fullArr = [];
+    let toBeHidden = [];
 
     getEverybody()
       .then((list) => {
@@ -111,7 +112,7 @@ module.exports = {
         // console.log(`Backup: `, JSON.stringify(everybodyBackup, null, 2));
         (async function loop() {
           do {
-            // console.log(`Everybody else:`, JSON.stringify(everybody, null, 2));
+            console.log(`Everybody else:`, JSON.stringify(everybody, null, 2));
             if (pairArr.length > 0) {
               console.log('oops, bad shuffle');
               iterator++;
@@ -134,18 +135,24 @@ module.exports = {
             groupArr = await getPastGroups(everybody[0].id);
             // console.log(`groups: `, JSON.stringify(groups, null, 2));
             groupArr = groupArr.map((a) => a.groupId);
-            // console.log('groupArr: ', groupArr);
+            console.log('groupArr: ', groupArr);
             // use past groups to get all previous pairs
             pairArr = await getPastPairs(groupArr);
-            // console.log('pairs array from group: ', JSON.stringify(pairs, null, 2));
+            // console.log('pairs array from group: ', JSON.stringify(pairArr, null, 2));
             pairArr = pairArr.map((a) => a.studentId);
 
-            // console.log(`Pair array after push, before for loop `, pairArr);
+            console.log(`Pair array after push, before for loop `, pairArr);
             let remainingPairs = fullArr.filter((x) => !pairArr.includes(x));
-            // console.log(`remainingPairs before new match`, remainingPairs);
+            console.log(`remainingPairs before new match`, remainingPairs);
+            if (remainingPairs.length === 0) {
+              console.log('All outta pairs!');
+              remainingPairs = fullArr.slice();
+              toBeHidden.push(...groupArr);
+              console.log(`to be hidden: `, toBeHidden);
+            }
 
             for (let i = 1; i < everybody.length; i++) {
-              // console.log('everybody[i]', everybody[i].id);
+              console.log('everybody[i]', everybody[i].id);
               if (remainingPairs.includes(everybody[i].id)) {
                 pairedArr.push([
                   `Group ${groupsCount}`,
@@ -155,17 +162,26 @@ module.exports = {
                   everybody[i].getFullName(),
                 ]);
                 remainingPairs = remainingPairs.filter((x) => x !== everybody[i].id);
-                remainingPairs.push(everybody[0].id);
+                if (remainingPairs.length === 2) {
+                  remainingPairs.push(everybody[0].id);
+                }
                 console.log(`remainingPairs after new match: `, remainingPairs);
                 let studentTwoGroup = await getPastGroups(everybody[i].id);
                 studentTwoGroup = studentTwoGroup.map((a) => a.groupId);
                 let studentTwoPair = await getPastPairs(studentTwoGroup);
                 studentTwoPair = studentTwoPair.map((a) => a.studentId);
                 let studentTwoRemain = fullArr.filter((x) => !studentTwoPair.includes(x));
+                if (studentTwoRemain.length === 0) {
+                  console.log('All outta pairs for Student Two!');
+                  toBeHidden.push(...studentTwoGroup);
+                  console.log(`to be hidden: `, toBeHidden);
+                }
                 studentTwoRemain = studentTwoRemain.filter((x) => x !== everybody[0].id);
-                studentTwoRemain.push(everybody[i].id);
+                if (studentTwoRemain.length === 2) {
+                  studentTwoRemain.push(everybody[i].id);
+                }
                 console.log(`student two remaining `, studentTwoRemain);
-                if (remainingPairs.length === 3 || studentTwoRemain === 3) {
+                if (remainingPairs.length === 3 || studentTwoRemain.length === 3) {
                   tripleCheck = true;
                   let deadly = +remainingPairs
                     .sort((a, b) => {
@@ -178,6 +194,7 @@ module.exports = {
                     })
                     .join('');
                   deadlyPattern.push(deadly, deadly2);
+                  console.log(`deadlyPattern array`, deadlyPattern);
                 }
                 everybody.splice(i, 1);
                 everybody.splice(0, 1);
@@ -217,6 +234,17 @@ module.exports = {
         })()
           .then(async () => {
             console.log(`Iterations: ${iterator}`);
+            console.log(`to be hidden: `, toBeHidden);
+            await Assignment.update(
+              { ishidden: true },
+              {
+                where: {
+                  groupId: {
+                    [Op.in]: toBeHidden,
+                  },
+                },
+              }
+            );
             groupsCount = 1;
             for (let i = 0; i < pairedArr.length; i++) {
               let newGroup = await Group.create({ group_name: `Group ${groupsCount}` });
@@ -244,12 +272,12 @@ module.exports = {
         { firstName: 'Davey', lastName: 'Dillups' },
         { firstName: 'Edmund', lastName: 'Everly' },
         { firstName: 'Frankie', lastName: 'Fivetimes' },
-        { firstName: 'Gilbert', lastName: 'Grape' },
-        { firstName: 'Harry', lastName: 'Hambone' },
-        { firstName: 'India', lastName: 'Illmatic' },
-        { firstName: 'Julie', lastName: 'July' },
-        { firstName: 'Kelly', lastName: 'Kapowski' },
-        { firstName: 'Leslie', lastName: 'Lamour' },
+        // { firstName: 'Gilbert', lastName: 'Grape' },
+        // { firstName: 'Harry', lastName: 'Hambone' },
+        // { firstName: 'India', lastName: 'Illmatic' },
+        // { firstName: 'Julie', lastName: 'July' },
+        // { firstName: 'Kelly', lastName: 'Kapowski' },
+        // { firstName: 'Leslie', lastName: 'Lamour' },
       ]);
 
       // await Group.bulkCreate([

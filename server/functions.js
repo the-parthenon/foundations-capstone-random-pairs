@@ -37,7 +37,9 @@ module.exports = {
     let pairQuery = new Promise((resolve, reject) => {
       let pairedList = Assignment.findAll({
         attributes: ['groupId'],
-        where: { studentId: idnum },
+        where: {
+          [Op.and]: [{ studentId: idnum }, { ishidden: false }],
+        },
       });
       resolve(pairedList);
     });
@@ -51,8 +53,9 @@ module.exports = {
         attributes: ['studentId'],
         where: {
           groupId: {
-            [Op.or]: arr,
+            [Op.in]: arr,
           },
+          ishidden: false,
         },
         group: 'studentId',
       });
