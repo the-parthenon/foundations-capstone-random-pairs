@@ -18,7 +18,7 @@ const getPairings = () => {
       pairList.append(pairDiv);
       let divTitle = `<h5>${elem[0]}</h5>`;
       pairDiv.innerHTML += `${divTitle}`;
-      for (let i = 1; i < elem.length; i++) {
+      for (let i = 3; i < elem.length; i++) {
         let pText = `<p>${i}. ${elem[i]}</p>`;
         // pText.innerHTML += `${pText}`;
         pairDiv.innerHTML += `${pText}`;
