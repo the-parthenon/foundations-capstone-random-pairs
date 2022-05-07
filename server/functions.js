@@ -63,4 +63,14 @@ module.exports = {
     });
     return pairQuery;
   },
+
+  storeTriples: (arr, arr2, studentId) => {
+    arr.push(studentId);
+    let deadly = +arr
+      .sort((a, b) => {
+        return a - b;
+      })
+      .join('');
+    arr2.push(deadly);
+  },
 };

@@ -14,7 +14,13 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
 
 module.exports = sequelize;
 
-const { getEverybody, getPastGroups, getPastPairs, shuffle } = require('./functions.js');
+const {
+  getEverybody,
+  getPastGroups,
+  getPastPairs,
+  shuffle,
+  storeTriples,
+} = require('./functions.js');
 const { Student, Group, Assignment } = require('./models'); //Assignment
 
 module.exports = {
@@ -112,38 +118,31 @@ module.exports = {
         // console.log(`Backup: `, JSON.stringify(everybodyBackup, null, 2));
         (async function loop() {
           do {
-            console.log(`Everybody else:`, JSON.stringify(everybody, null, 2));
+            // console.log(`Everybody else:`, JSON.stringify(everybody, null, 2));
             if (pairArr.length > 0) {
               console.log('oops, bad shuffle');
               iterator++;
-              console.log('iterator', iterator);
               groupArr.length = 0;
-              // console.log('groupArr', groupArr);
               pairArr.length = 0;
-              // console.log('pairArr', pairArr);
               pairedArr.length = 0;
-              // console.log('pairedArr', pairedArr);
               deadlyPattern.length = 0;
               groupsCount = 1;
               everybody = everybodyBackup.slice();
               shuffle(everybody);
-              // console.log('Everybody ', JSON.stringify(everybody, null, 2));
-
-              // break;
             }
             //get the past groups for the current student
             groupArr = await getPastGroups(everybody[0].id);
             // console.log(`groups: `, JSON.stringify(groups, null, 2));
             groupArr = groupArr.map((a) => a.groupId);
-            console.log('groupArr: ', groupArr);
+            // console.log('groupArr: ', groupArr);
             // use past groups to get all previous pairs
             pairArr = await getPastPairs(groupArr);
             // console.log('pairs array from group: ', JSON.stringify(pairArr, null, 2));
             pairArr = pairArr.map((a) => a.studentId);
 
-            console.log(`Pair array after push, before for loop `, pairArr);
+            // console.log(`Pair array after push, before for loop `, pairArr);
             let remainingPairs = fullArr.filter((x) => !pairArr.includes(x));
-            console.log(`remainingPairs before new match`, remainingPairs);
+            // console.log(`remainingPairs before new match`, remainingPairs);
             if (remainingPairs.length === 0) {
               console.log('All outta pairs!');
               remainingPairs = fullArr.slice();
@@ -152,7 +151,7 @@ module.exports = {
             }
 
             for (let i = 1; i < everybody.length; i++) {
-              console.log('everybody[i]', everybody[i].id);
+              // console.log('everybody[i]', everybody[i].id);
               if (remainingPairs.includes(everybody[i].id)) {
                 pairedArr.push([
                   `Group ${groupsCount}`,
@@ -162,10 +161,13 @@ module.exports = {
                   everybody[i].getFullName(),
                 ]);
                 remainingPairs = remainingPairs.filter((x) => x !== everybody[i].id);
+
+                //If active student has two pairs remaining, store those pairs for later verification that we have not created a deadly pattern
                 if (remainingPairs.length === 2) {
-                  remainingPairs.push(everybody[0].id);
+                  storeTriples(remainingPairs, deadlyPattern, everybody[0].id);
+                  tripleCheck = true;
                 }
-                console.log(`remainingPairs after new match: `, remainingPairs);
+                // console.log(`remainingPairs after new match: `, remainingPairs);
                 let studentTwoGroup = await getPastGroups(everybody[i].id);
                 studentTwoGroup = studentTwoGroup.map((a) => a.groupId);
                 let studentTwoPair = await getPastPairs(studentTwoGroup);
@@ -178,35 +180,18 @@ module.exports = {
                 }
                 studentTwoRemain = studentTwoRemain.filter((x) => x !== everybody[0].id);
                 if (studentTwoRemain.length === 2) {
-                  studentTwoRemain.push(everybody[i].id);
-                }
-                console.log(`student two remaining `, studentTwoRemain);
-                if (remainingPairs.length === 3 || studentTwoRemain.length === 3) {
+                  storeTriples(studentTwoRemain, deadlyPattern, everybody[i].id);
                   tripleCheck = true;
-                  let deadly = +remainingPairs
-                    .sort((a, b) => {
-                      return a - b;
-                    })
-                    .join('');
-                  let deadly2 = +studentTwoRemain
-                    .sort((a, b) => {
-                      return a - b;
-                    })
-                    .join('');
-                  deadlyPattern.push(deadly, deadly2);
-                  console.log(`deadlyPattern array`, deadlyPattern);
                 }
                 everybody.splice(i, 1);
                 everybody.splice(0, 1);
                 groupArr.length = 0;
                 pairArr.length = 0;
                 groupsCount++;
-                // console.log('pairArr after clear', pairArr);
-                // console.log('groupArr after clear', groupArr);
                 break;
               }
             }
-            // console.log(pairedArr);
+
             if (everybody.length === 0 && tripleCheck === true) {
               console.log('Time for triple check!!', deadlyPattern);
               const getOccurrence = (array, value) => {
@@ -234,21 +219,22 @@ module.exports = {
         })()
           .then(async () => {
             console.log(`Iterations: ${iterator}`);
-            console.log(`to be hidden: `, toBeHidden);
-            await Assignment.update(
-              { ishidden: true },
-              {
-                where: {
-                  groupId: {
-                    [Op.in]: toBeHidden,
+            // console.log(`to be hidden: `, toBeHidden);
+            if (toBeHidden.length > 0) {
+              await Assignment.update(
+                { ishidden: true },
+                {
+                  where: {
+                    groupId: {
+                      [Op.in]: toBeHidden,
+                    },
                   },
-                },
-              }
-            );
-            groupsCount = 1;
+                }
+              );
+            }
+
             for (let i = 0; i < pairedArr.length; i++) {
-              let newGroup = await Group.create({ group_name: `Group ${groupsCount}` });
-              groupsCount++;
+              let newGroup = await Group.create({ group_name: pairedArr[i][0] });
               await Assignment.bulkCreate([
                 { groupId: newGroup.id, studentId: pairedArr[i][1] },
                 { groupId: newGroup.id, studentId: pairedArr[i][2] },
