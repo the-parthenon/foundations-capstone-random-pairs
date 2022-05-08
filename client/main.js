@@ -18,10 +18,12 @@ const getPairings = () => {
       pairList.append(pairDiv);
       let divTitle = `<h5>${elem[0]}</h5>`;
       pairDiv.innerHTML += `${divTitle}`;
-      for (let i = 3; i < elem.length; i++) {
-        let pText = `<p>${i}. ${elem[i]}</p>`;
+      let count = 1;
+      for (let i = Math.ceil(elem.length / 2); i < elem.length; i++) {
+        let pText = `<p>${count}. ${elem[i]}</p>`;
         // pText.innerHTML += `${pText}`;
         pairDiv.innerHTML += `${pText}`;
+        count++;
       }
       // pairDiv.innerHTML += `${divTitle} <p>1. ${elem[1]} 2. ${elem[2]}</p>`;
     });

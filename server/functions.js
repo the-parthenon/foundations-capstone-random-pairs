@@ -54,6 +54,7 @@ module.exports = {
         where: {
           groupId: {
             [Op.in]: arr,
+            [Op.not]: null,
           },
           ishidden: false,
         },
@@ -72,5 +73,10 @@ module.exports = {
       })
       .join('');
     arr2.push(deadly);
+  },
+
+  storeHiddenGroups: (arr, arr2) => {
+    arr.push(...arr2);
+    console.log(`to be hidden: `, arr);
   },
 };
