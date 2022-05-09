@@ -66,17 +66,22 @@ module.exports = {
   },
 
   storeTriples: (arr, arr2, studentId) => {
-    arr.push(studentId);
-    let deadly = +arr
-      .sort((a, b) => {
-        return a - b;
-      })
-      .join('');
-    arr2.push(deadly);
+    if (arr.length % 2 === 0) {
+      arr.push(studentId);
+      let deadly = +arr
+        .sort((a, b) => {
+          return a - b;
+        })
+        .join('');
+      arr2.push(deadly);
+      return true;
+    }
   },
 
-  storeHiddenGroups: (arr, arr2) => {
-    arr.push(...arr2);
-    console.log(`to be hidden: `, arr);
+  storeHiddenGroups: (rem, full, hidden, group) => {
+    if (rem.length === 0) {
+      rem.push(...full);
+      hidden.push(...group);
+    }
   },
 };

@@ -16,8 +16,6 @@ module.exports = sequelize;
 
 const {
   getEverybody,
-  getPastGroups,
-  getPastPairs,
   shuffle,
   storeTriples,
   storeHiddenGroups,
@@ -34,7 +32,7 @@ module.exports = {
   },
 
   addStudent: (req, res) => {
-    console.log('Endpoint set up!');
+    // console.log('Endpoint set up!');
     const { newName } = req.body;
     console.log(newName);
     (async () => {
@@ -56,82 +54,15 @@ module.exports = {
     let fullArr = [];
     let toBeHidden = [];
     let everybodyBackup = [];
+    let checkLength = 0;
 
     getEverybody()
       .then((list) => {
         fullArr = list.map((a) => a.id);
         everybodyBackup = list.slice();
-        // console.log(fullArr);
         return (everybody = list);
       })
-      .then(async () => {
-        // console.log(everybody.length);
-        console.log(`Everybody: `, JSON.stringify(everybody, null, 2));
-        if (everybody.length % 2 !== 0) {
-          console.log('Uh-oh, odd number of students!');
-
-          // console.log(everybody.length);
-          groupArr = await getPastGroups(everybody[0].id);
-          groupArr = groupArr.map((a) => a.groupId);
-          pairArr = await getPastPairs(groupArr);
-          pairArr = pairArr.map((a) => a.studentId);
-          let remainingPairs = fullArr.filter((x) => !pairArr.includes(x));
-          console.log(`remainingPairs before new match`, remainingPairs);
-
-          if (remainingPairs.length === 0) {
-            remainingPairs = fullArr.slice();
-            storeHiddenGroups(toBeHidden, remainingPairs);
-          }
-
-          for (let i = 1; i < everybody.length; i++) {
-            if (remainingPairs.includes(everybody[i].id)) {
-              let groupArrTwo = await getPastGroups(everybody[i].id);
-              groupArrTwo = groupArrTwo.map((a) => a.groupId);
-              let pairArrTwo = await getPastPairs(groupArrTwo);
-              pairArrTwo = pairArrTwo.map((a) => a.studentId);
-              let remainingPairsTwo = fullArr.filter((x) => !pairArrTwo.includes(x));
-              console.log(`First remaining Pairs`, remainingPairs);
-              console.log(`Second remaining pairs`, remainingPairsTwo);
-              for (let j = i + 1; j < everybody.length; j++) {
-                console.log(everybody[j].id);
-                if (
-                  remainingPairs.includes(everybody[j].id) &&
-                  remainingPairsTwo.includes(everybody[j].id)
-                ) {
-                  pairedArr.push([
-                    `Group ${groupsCount}`,
-                    everybody[0].id,
-                    everybody[i].id,
-                    everybody[j].id,
-                    everybody[0].getFullName(),
-                    everybody[i].getFullName(),
-                    everybody[j].getFullName(),
-                  ]);
-                  everybody.splice(j, 1);
-                  everybody.splice(i, 1);
-                  everybody.splice(0, 1);
-                  groupArr = [];
-                  pairArr = [];
-                  groupsCount++;
-                  // console.log(pairedArr);
-                  break;
-                }
-                // let newGroup = await Group.create({
-                //   group_name: `Group ${groupsCount}`,
-              }
-              // await Assignment.bulkCreate([
-              //   { groupId: newGroup.id, studentId: everybody[0].id },
-              //   { groupId: newGroup.id, studentId: everybody[i].id },
-              //   { groupId: newGroup.id, studentId: everybody[j].id },
-              // ]);
-              break;
-            }
-          }
-          // break;
-        }
-      })
       .then(() => {
-        // console.log(`Backup: `, JSON.stringify(everybodyBackup, null, 2));
         (async function loop() {
           do {
             console.log(`Everybody else:`, JSON.stringify(everybody, null, 2));
@@ -141,56 +72,115 @@ module.exports = {
               everybody[0].id
             );
             console.log(`remainingPairs before new match`, remainingPairs);
-            if (remainingPairs.length === 0) {
-              remainingPairs = fullArr.slice();
-              storeHiddenGroups(toBeHidden, groupArr);
-            }
+
+            storeHiddenGroups(remainingPairs, fullArr, toBeHidden, groupArr);
 
             for (let i = 1; i < everybody.length; i++) {
               // console.log(`remainingPairs `, remainingPairs);
               console.log('everybody[i]', everybody[i].id);
               if (remainingPairs.includes(everybody[i].id)) {
-                pairedArr.push([
-                  `Group ${groupsCount}`,
-                  everybody[0].id,
-                  everybody[i].id,
-                  everybody[0].getFullName(),
-                  everybody[i].getFullName(),
-                ]);
-                remainingPairs = remainingPairs.filter((x) => x !== everybody[i].id);
-
-                //If active student has two pairs remaining, store those pairs for later verification that we have not created a deadly pattern
-                if (remainingPairs.length === 2) {
-                  storeTriples(remainingPairs, deadlyPattern, everybody[0].id);
-                  tripleCheck = true;
-                }
-                // console.log(`remainingPairs after new match: `, remainingPairs);
-                // let studentTwoGroup = await getPastGroups(everybody[i].id);
-                // studentTwoGroup = studentTwoGroup.map((a) => a.groupId);
-                // let studentTwoPair = await getPastPairs(studentTwoGroup);
-                // studentTwoPair = studentTwoPair.map((a) => a.studentId);
-                // let studentTwoRemain = fullArr.filter((x) => !studentTwoPair.includes(x));
                 let { group: studentTwoGroup, remain: studentTwoRemain } =
                   await getRemainingPairs(fullArr, everybody[i].id);
 
-                if (studentTwoRemain.length === 0) {
-                  console.log('All outta pairs for Student Two!');
-                  storeHiddenGroups(toBeHidden, studentTwoGroup);
+                storeHiddenGroups(studentTwoRemain, fullArr, toBeHidden, studentTwoGroup);
+
+                if (everybody.length % 2 !== 0) {
+                  console.log('uh-oh, odd number of students!');
+                  for (let j = i + 1; j < everybody.length; j++) {
+                    console.log('everybody[j]', everybody[j].id);
+                    if (
+                      remainingPairs.includes(everybody[j].id) &&
+                      studentTwoRemain.includes(everybody[j].id)
+                    ) {
+                      let { group: studentThreeGroup, remain: studentThreeRemain } =
+                        await getRemainingPairs(fullArr, everybody[j].id);
+
+                      storeHiddenGroups(
+                        studentThreeRemain,
+                        fullArr,
+                        toBeHidden,
+                        studentThreeGroup
+                      );
+
+                      studentThreeRemain = studentThreeRemain.filter(
+                        (x) => x !== everybody[i].id && x !== everybody[0].id
+                      );
+                      if (studentThreeRemain.length % 2 === 0) {
+                        storeTriples(studentThreeRemain, deadlyPattern, everybody[j].id);
+                        tripleCheck = true;
+                      }
+
+                      pairedArr.push([
+                        `Group ${groupsCount}`,
+                        everybody[0].id,
+                        everybody[i].id,
+                        everybody[j].id,
+                        everybody[0].getFullName(),
+                        everybody[i].getFullName(),
+                        everybody[j].getFullName(),
+                      ]);
+
+                      remainingPairs = remainingPairs.filter(
+                        (x) => x !== everybody[i].id && x !== everybody[j].id
+                      );
+                      studentTwoRemain = studentTwoRemain.filter(
+                        (x) => x !== everybody[0].id && x !== everybody[j].id
+                      );
+                      everybody.splice(j, 1);
+                      break;
+                    }
+                  }
+                  if (pairedArr.length === 0) {
+                    console.log('new bad shuffle logic (with a triple!)');
+                    deadlyPattern.length = 0;
+                    iterator++;
+                    groupsCount = 1;
+                    everybody = everybodyBackup.slice();
+                    shuffle(everybody);
+                    break;
+                  }
+                } else {
+                  pairedArr.push([
+                    `Group ${groupsCount}`,
+                    everybody[0].id,
+                    everybody[i].id,
+                    everybody[0].getFullName(),
+                    everybody[i].getFullName(),
+                  ]);
+                  remainingPairs = remainingPairs.filter((x) => x !== everybody[i].id);
+                  studentTwoRemain = studentTwoRemain.filter(
+                    (x) => x !== everybody[0].id
+                  );
                 }
-                studentTwoRemain = studentTwoRemain.filter((x) => x !== everybody[0].id);
-                if (studentTwoRemain.length === 2) {
-                  storeTriples(studentTwoRemain, deadlyPattern, everybody[i].id);
-                  tripleCheck = true;
+                //If active student has two pairs remaining, store those pairs for later verification that we have not created a deadly pattern
+                console.log('pairs left after match', remainingPairs);
+                if (remainingPairs.length < fullArr.length / 2) {
+                  tripleCheck = storeTriples(
+                    remainingPairs,
+                    deadlyPattern,
+                    everybody[0].id
+                  );
+                  console.log(deadlyPattern);
+                  checkLength = remainingPairs.length;
                 }
+
+                console.log('S2 pairs after match', studentTwoRemain);
+                if (studentTwoRemain.length < fullArr.length / 2) {
+                  tripleCheck = storeTriples(
+                    studentTwoRemain,
+                    deadlyPattern,
+                    everybody[i].id
+                  );
+                  console.log('deadly after S2', deadlyPattern);
+                }
+
                 everybody.splice(i, 1);
                 everybody.splice(0, 1);
-                groupArr.length = 0;
                 groupsCount++;
                 break;
               } else if (i === everybody.length - 1) {
                 console.log('new bad shuffle logic');
 
-                groupArr.length = 0;
                 pairedArr.length = 0;
                 deadlyPattern.length = 0;
 
@@ -202,15 +192,17 @@ module.exports = {
               }
             }
 
-            if (everybody.length === 0 && tripleCheck === true) {
+            if (everybody.length === 0 && tripleCheck === true && checkLength > 1) {
               console.log('Time for triple check!!', deadlyPattern);
+
               const getOccurrence = (array, value) => {
                 return array.filter((v) => v === value).length;
               };
 
               const tripleCheck = (test) => {
                 for (let i = 0; i < test.length; i++) {
-                  if (getOccurrence(test, test[i]) === 3) {
+                  console.log('checkLength', checkLength);
+                  if (getOccurrence(test, test[i]) === checkLength) {
                     return true;
                   }
                 }
@@ -276,10 +268,10 @@ module.exports = {
         { firstName: 'Davey', lastName: 'Dillups' },
         { firstName: 'Edmund', lastName: 'Everly' },
         { firstName: 'Frankie', lastName: 'Fivetimes' },
-        // { firstName: 'Gilbert', lastName: 'Grape' },
-        // { firstName: 'Harry', lastName: 'Hambone' },
-        // { firstName: 'India', lastName: 'Illmatic' },
-        // { firstName: 'Julie', lastName: 'July' },
+        { firstName: 'Gilbert', lastName: 'Grape' },
+        { firstName: 'Harry', lastName: 'Hambone' },
+        { firstName: 'India', lastName: 'Illmatic' },
+        { firstName: 'Julie', lastName: 'July' },
         // { firstName: 'Kelly', lastName: 'Kapowski' },
         // { firstName: 'Leslie', lastName: 'Lamour' },
       ]);

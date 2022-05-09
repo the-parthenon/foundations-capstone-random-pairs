@@ -10,7 +10,7 @@ module.exports = {
     let pairArr = await getPastPairs(groupArr);
     pairArr = pairArr.map((a) => a.studentId);
     let remainingPairs = arr.filter((x) => !pairArr.includes(x));
-    console.log('remaining pairs ', remainingPairs);
+    // console.log('remaining pairs ', remainingPairs);
 
     return {
       group: groupArr,
