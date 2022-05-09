@@ -27,6 +27,9 @@ module.exports = {
   //Gets a full list of the entries in the Students table
   getList: (req, res) => {
     getEverybody().then((list) => {
+      list.sort((a, b) => {
+        return a.firstName.localeCompare(b.firstName);
+      });
       res.status(200).send(list);
     });
   },
@@ -41,6 +44,60 @@ module.exports = {
     })().then(() => {
       console.log('Added a student');
       res.sendStatus(200);
+    });
+  },
+
+  getOneHistory: (req, res) => {
+    console.log(req.body);
+    let nameArr = req.body.requestedName.split(' ');
+    let reqId = 0;
+    (async () => {
+      let idRequest = await Student.findAll({
+        attributes: ['id'],
+        where: {
+          firstName: nameArr[0],
+          lastName: nameArr[1],
+        },
+      });
+      console.log(JSON.stringify(idRequest, null, 2));
+      reqId = idRequest[0].id;
+    })().then(async () => {
+      console.log(`reqId`, reqId);
+      let pastGroups = await Assignment.findAll({
+        attributes: ['groupId'],
+        where: {
+          studentId: reqId,
+        },
+      });
+      pastGroups = pastGroups.map((a) => a.groupId);
+      console.log('past groups: ', pastGroups);
+      let pastPairs = await Assignment.findAll({
+        attributes: ['studentId'],
+        where: {
+          groupId: {
+            [Op.in]: pastGroups,
+            [Op.not]: null,
+          },
+          studentId: {
+            [Op.not]: reqId,
+          },
+        },
+        group: ['studentId', 'createdAt'],
+        order: ['createdAt'],
+      });
+      console.log('past pairs', JSON.stringify(pastPairs, null, 2));
+      pastPairs = pastPairs.map((a) => a.studentId);
+      console.log('pairs array', pastPairs);
+      let allPastPairs = await Student.findAll({
+        attributes: ['firstName', 'lastName'],
+        where: {
+          id: {
+            [Op.in]: pastPairs,
+          },
+        },
+      });
+      console.log('past students', JSON.stringify(allPastPairs, null, 2));
+      res.status(200).send(allPastPairs);
     });
   },
 

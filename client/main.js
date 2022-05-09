@@ -1,9 +1,10 @@
 const getPairButton = document.getElementById('rando-button');
 const pairList = document.getElementById('pair-list');
 const studentList = document.getElementById('student-list');
-// const pairOneButton = document.getElementById('single-test');
 const addButton = document.getElementById('add-button');
 const addStudent = document.getElementById('add-student');
+const stuHist = document.getElementById('get-student-history');
+const stuHistDisplay = document.getElementById('display-student-history');
 
 const getPairings = () => {
   console.log(`Going to get pairings!`);
@@ -21,11 +22,10 @@ const getPairings = () => {
       let count = 1;
       for (let i = Math.ceil(elem.length / 2); i < elem.length; i++) {
         let pText = `<p>${count}. ${elem[i]}</p>`;
-        // pText.innerHTML += `${pText}`;
+
         pairDiv.innerHTML += `${pText}`;
         count++;
       }
-      // pairDiv.innerHTML += `${divTitle} <p>1. ${elem[1]} 2. ${elem[2]}</p>`;
     });
   });
 };
@@ -34,10 +34,16 @@ const getStudents = () => {
   console.log(`Going to get the students!`);
   axios.get(`http://localhost:6060/studentlist`).then((res) => {
     console.log(res.data);
-    res.data.forEach((elem) => {
-      let student = `<h1>${elem.firstName} ${elem.lastName}</h1>`;
+    let select = document.getElementById('select-student');
 
-      studentList.innerHTML += student;
+    res.data.forEach((elem) => {
+      let student = '';
+      student += elem.firstName + ' ' + elem.lastName;
+      let choice = document.createElement('option');
+      // choice.textContent = student;
+      choice.value = student;
+      // choice.classList.add('dropdown-item');
+      select.appendChild(choice);
     });
   });
 };
@@ -55,15 +61,35 @@ const addNewStudent = (evt) => {
   });
 };
 
-// const pairOne = () => {
-//   console.log(`Single pair, heard!`);
-//   axios.get(`http://localhost:6060/pairone`).then((res) => {
-//     console.log(res.data);
-//   });
-// };
+const getStudentHistory = (evt) => {
+  evt.preventDefault();
+  console.log('Fetching History!');
+  let studentName = document.getElementById('historyList');
+  // console.log(studentName);
+  console.log(`${studentName.value}`);
+  let body = {
+    requestedName: studentName.value,
+  };
+  axios.post(`http://localhost:6060/studenthist`, body).then((res) => {
+    console.log(res.data);
+    while (stuHistDisplay.firstChild) {
+      stuHistDisplay.removeChild(stuHistDisplay.firstChild);
+    }
+    let sectionTitle = `<h5>${studentName.value} Has Previously Paired With</h5>`;
+    stuHistDisplay.innerHTML += `${sectionTitle}`;
+    res.data.forEach((elem) => {
+      let histDiv = document.createElement('div');
+      stuHistDisplay.append(histDiv);
 
-// getStudents();
+      let pText = `<p>${elem.firstName} ${elem.lastName}</p>`;
+
+      histDiv.innerHTML += `${pText}`;
+    });
+    studentName.value = '';
+  });
+};
+
+getStudents();
 getPairButton.addEventListener('click', getPairings);
 addStudent.addEventListener('submit', addNewStudent);
-
-// pairOneButton.addEventListener('click', pairOne);
+stuHist.addEventListener('submit', getStudentHistory);
