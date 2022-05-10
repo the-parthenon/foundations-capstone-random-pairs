@@ -30,15 +30,11 @@
   </div>
 
   <body>
-    <div class="container">
-      
+    <div class="container">      
       <div class="col align-self-center">
         <h2>Let's make some pairs!</h2>
-      </div>
-      
-    
-      <button type = "button" class="btn btn-info" id="rando-button">Make Dem Pairs!</button>
-      
+      </div>    
+      <button type = "button" class="btn btn-info" id="rando-button">Make Dem Pairs!</button>      
     </div>
 
     <br>
@@ -58,25 +54,45 @@
 
       <label for="historyList" class="form-label">Display Pairing History</label>
       <form id="get-student-history">
-        
-        <input class="form-control" list="select-student" id="historyList" placeholder="Type to search...">
-        <datalist id="select-student">
-        </datalist>
-        <button id="st-hist-button">Get History!</button>
-        
+        <!-- <div class="row"> -->
+          <!-- <div class="col-8"> -->
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" list="select-student" id="historyList" placeholder="Type to search...">
+            <datalist id="select-student">
+            </datalist>
+            <button id="st-hist-button" class="btn btn-info">Get History!</button>
+          </div>
+
+          <!-- </div> -->
+          <!-- <div class="col-3">
+          </div> -->
+        <!-- </div>         -->
       </form>
     </div>
-
-
-    <div class="container">
-      <section id="display-student-history"></section>
+    <div class="container" class="col">
+      <section id="display-student-history" class="row"></section>
+        <div class ="invisible" class="d-flex align-items-center" id="hist-loading">
+          <strong>Fetching History...</strong>
+          <div class="spinner-border ms-auto" role="status"></div>
+        </div>
     </div>
 
+    <br>
     <div class="container">
       <form id="add-student">
-        <input id="student-name" type="text" placeholder="Add a student!" />
-        <button id="add-button">Add to Class!</button>
+        <div class="input-group mb-3">
+          <input id="student-name" type="text" class="form-control" placeholder="Add a student!">
+          <button class="btn btn-info" type="submit" id="add-button">Add to Class!</button>
+        </div>
+        <!-- <input id="student-name" type="text" placeholder="Add a student!" />
+        <button id="add-button" class="btn btn-info">Add to Class!</button> -->
       </form>
+      <div id="add-alert" class="alert alert-primary collapse" role="alert">
+        Adding a new student!
+      </div>
+      <div id="add-success" class="alert alert-success collapse" role="alert">        
+        Successfully added your new student!
+      </div>
     </div>
 
 
