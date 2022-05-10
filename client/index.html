@@ -30,16 +30,29 @@
   </div>
 
   <body>
-    <h1>Let's make some pairs!</h1>
-
-    <button id="rando-button">Make Dem Pairs!</button>
-    <form id="add-student">
-      <input id="student-name" type="text" placeholder="Add a student!" />
-      <button id="add-button">Add to Class!</button>
-    </form>
+    <div class="container">
+      
+      <div class="col align-self-center">
+        <h2>Let's make some pairs!</h2>
+      </div>
+      
+    
+      <button type = "button" class="btn btn-info" id="rando-button">Make Dem Pairs!</button>
+      
+    </div>
 
     <br>
     <br>
+    
+    <div class="container" class="col">
+      <section id="pair-list" class="row"></section>
+      
+        <div class ="invisible" class="d-flex align-items-center" id="pair-loading">
+          <strong>Reticulating Splines...</strong>
+          <div class="spinner-border ms-auto" role="status"></div>
+        </div>
+      
+    </div>
 
     <div class="container">
 
@@ -55,10 +68,17 @@
     </div>
 
 
+    <div class="container">
+      <section id="display-student-history"></section>
+    </div>
 
-    <section id="display-student-history"></section>
+    <div class="container">
+      <form id="add-student">
+        <input id="student-name" type="text" placeholder="Add a student!" />
+        <button id="add-button">Add to Class!</button>
+      </form>
+    </div>
 
-    <section id="pair-list"></section>
 
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"

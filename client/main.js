@@ -5,18 +5,22 @@ const addButton = document.getElementById('add-button');
 const addStudent = document.getElementById('add-student');
 const stuHist = document.getElementById('get-student-history');
 const stuHistDisplay = document.getElementById('display-student-history');
+const pairSpinner = document.getElementById('pair-loading');
 
 const getPairings = () => {
   console.log(`Going to get pairings!`);
+  getPairButton.setAttribute('disabled', '');
+  pairSpinner.classList.remove('invisible');
+  while (pairList.firstChild) {
+    pairList.removeChild(pairList.firstChild);
+  }
   axios.get(`http://localhost:6060/pairings`).then((res) => {
     console.log(res.data);
-    while (pairList.firstChild) {
-      pairList.removeChild(pairList.firstChild);
-    }
 
     res.data.forEach((elem) => {
       let pairDiv = document.createElement('div');
       pairList.append(pairDiv);
+      pairDiv.classList.add('col-3');
       let divTitle = `<h5>${elem[0]}</h5>`;
       pairDiv.innerHTML += `${divTitle}`;
       let count = 1;
@@ -27,6 +31,8 @@ const getPairings = () => {
         count++;
       }
     });
+    getPairButton.removeAttribute('disabled');
+    pairSpinner.classList.add('invisible');
   });
 };
 
