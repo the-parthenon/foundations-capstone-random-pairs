@@ -73,7 +73,7 @@ const addNewStudent = (evt) => {
     setTimeout(() => {
       document.getElementById('add-success').classList.add('collapse');
     }, 3000);
-
+    addButton.removeAttribute('disabled');
     console.log('Student added!');
   });
 };
@@ -84,6 +84,7 @@ const getStudentHistory = (evt) => {
   while (stuHistDisplay.firstChild) {
     stuHistDisplay.removeChild(stuHistDisplay.firstChild);
   }
+  document.getElementById('display-student-history').classList.remove('collapse');
   histSpinner.classList.remove('invisible');
 
   // console.log('Fetching History!');
@@ -109,6 +110,9 @@ const getStudentHistory = (evt) => {
     stuHistButton.removeAttribute('disabled');
     histSpinner.classList.add('invisible');
     studentName.value = '';
+    setTimeout(() => {
+      document.getElementById('display-student-history').classList.add('collapse');
+    }, 12000);
   });
 };
 

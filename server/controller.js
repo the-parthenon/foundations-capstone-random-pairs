@@ -327,10 +327,14 @@ module.exports = {
         { firstName: 'Frankie', lastName: 'Fivetimes' },
         { firstName: 'Gilbert', lastName: 'Grape' },
         { firstName: 'Harry', lastName: 'Hambone' },
-        { firstName: 'India', lastName: 'Illmatic' },
-        { firstName: 'Julie', lastName: 'July' },
+        // { firstName: 'India', lastName: 'Illmatic' },
+        // { firstName: 'Julie', lastName: 'July' },
         // { firstName: 'Kelly', lastName: 'Kapowski' },
         // { firstName: 'Leslie', lastName: 'Lamour' },
+        // { firstName: 'Mookie', lastName: 'Miller' },
+        // { firstName: 'Nandor', lastName: 'Neverdie' },
+        // { firstName: 'Olivia', lastName: `O'Rielly` },
+        // { firstName: 'Peppermint', lastName: 'Patty' },
       ]);
 
       // await Group.bulkCreate([
